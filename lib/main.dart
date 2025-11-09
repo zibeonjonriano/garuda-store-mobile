@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:garuda_store/menu.dart';
+import 'package:garuda_store/screens/menu.dart';
 
 
 void main() {
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Garuda Store',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green)
          .copyWith(secondary: Colors.greenAccent[400]),
+         useMaterial3: true,
       ),
       home: MyHomePage(),
     );
