@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:garuda_store/widgets/left_drawer.dart';
+import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:garuda_store/screens/menu.dart';
 
 class ProductEntryFormPage extends StatefulWidget {
   const ProductEntryFormPage({super.key});
@@ -29,6 +33,7 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Form Tambah Product'),
@@ -255,54 +260,41 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
                         const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Product berhasil tersimpan'),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Nama: $_name'),
-                                    const SizedBox(height: 5),
-                                    Text('Harga: Rp ${_price.toString().replaceAllMapped(
-                                      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                                      (Match m) => '${m[1]}.',
-                                    )}'),
-                                    const SizedBox(height: 5),
-                                    Text('Deskripsi: $_description'),
-                                    const SizedBox(height: 5),
-                                    Text('Thumbnail: $_thumbnail'),
-                                    const SizedBox(height: 5),
-                                    Text('Kategori: $_category'),
-                                    const SizedBox(height: 5),
-                                    Text('Produk Unggulan: ${_isFeatured ? "Ya" : "Tidak"}'),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _formKey.currentState!.reset();
-                                    setState(() {
-                                      _name = "";
-                                      _price = 0;
-                                      _description = "";
-                                      _thumbnail = "";
-                                      _category = "";
-                                      _isFeatured = false;
-                                    });
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+                        // TODO: Replace the URL with your app's URL
+                        // To connect Android emulator with Django on localhost, use URL http://10.0.2.2/
+                        // If you using chrome,  use URL http://localhost:8000
+                        final response = await request.postJson(
+                          "http://localhost:8000/create-flutter/",
+                          jsonEncode({
+                            "name": _name,
+                            "price": _price,
+                            "description": _description,
+                            "thumbnail": _thumbnail,
+                            "category": _category.toLowerCase(),  // convert -> sesuai model
+                            "is_featured": _isFeatured,
+                            "size": "m",   // opsional, bisa kamu buat field nanti
+                            "stock": 0,
+                          }),
                         );
+
+                        if (context.mounted) {
+                          if (response["status"] == "success") {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Product berhasil disimpan!")),
+                            );
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => MyHomePage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Gagal menyimpan product!")),
+                            );
+                          }
+                        }
                       }
                     },
                     child: const Text(

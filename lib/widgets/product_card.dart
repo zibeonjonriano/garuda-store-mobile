@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:garuda_store/screens/productentry_form.dart';
+import 'package:garuda_store/screens/product_entry_list.dart';
+import 'package:garuda_store/screens/login.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 class ItemHomepage {
   final String name;
@@ -16,11 +20,12 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Material(
       color: item.color,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        onTap: () {
+        onTap: () async {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(SnackBar(
@@ -34,7 +39,29 @@ class ItemCard extends StatelessWidget {
                 builder: (context) => const ProductEntryFormPage(),
               ),
             );
+          } // Add this condition in your onTap handler
+          else if (item.name == "All Products") {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProductEntryListPage(
+                    showMyProductsOnly: false,  // Show all
+                  ),
+                ),
+              );
+            }
+          // Add this after your previous if statements
+          else if (item.name == "My Products") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProductEntryListPage(
+                  showMyProductsOnly: true,  // Show only user's products
+                ),
+              ),
+            );
           }
+
         },
         child: Container(
           padding: const EdgeInsets.all(8),
